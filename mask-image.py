@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 import mediapipe as mp
+import os
 
 # Initialize MediaPipe solutions
 mp_selfie_segmentation = mp.solutions.selfie_segmentation
@@ -9,7 +10,7 @@ def create_mask(image_path, output_path):
     # Load the input image
     image = cv2.imread(image_path)
     if image is None:
-        print("Error: Unable to load image.")
+        print(f"Error: Unable to load image {image_path}")
         return
 
     # Resize the image for consistent processing
@@ -36,8 +37,29 @@ def create_mask(image_path, output_path):
 
     print(f"Mask saved to: {output_path}")
 
-# Example usage
-input_image_path = "test/s5.jpeg"  # Replace with your image path
-output_mask_path = "test/_s5selfie_mask.jpeg"  # Output path for the mask
 
-create_mask(input_image_path, output_mask_path)
+def process_folder(input_folder, output_folder):
+    # Create output folder if it doesn't exist
+    if not os.path.exists(output_folder):
+        os.makedirs(output_folder)
+
+    # Loop through all files in the input folder
+    for filename in os.listdir(input_folder):
+        input_path = os.path.join(input_folder, filename)
+
+        # Check if it's an image file
+        if filename.lower().endswith(('.png', '.jpg', '.jpeg')):
+            # Construct output path
+            output_path = os.path.join(output_folder, f"mask_{filename}")
+
+            # Process the image
+            create_mask(input_path, output_path)
+        else:
+            print(f"Skipping non-image file: {filename}")
+
+
+# Example usage
+input_folder_path = "test\input"  # Replace with your input folder path
+output_folder_path = "test\output"  # Replace with your desired output folder path
+
+process_folder(input_folder_path, output_folder_path)
